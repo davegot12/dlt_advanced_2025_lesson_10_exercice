@@ -36,7 +36,7 @@ def get_customers():
 def get_orders():
     paginate = client.paginate(
         "orders",
-        params={"page_size": 500}, # Will yield pages with more records, bigger chunks.
+        params={"page_size": 500, "start_date": "2017-08-15"}, # Will yield pages with more records, bigger chunks.
     )
     for page in paginate:
         yield page
@@ -56,26 +56,13 @@ def jaffle_source():
     return [get_customers(), get_orders(), get_products()]
 
 
-pipeline = dlt.pipeline(
-    pipeline_name="jaffle_shop_optimized",
-    destination="duckdb",
-    dataset_name="jaffle_shop_optimized",
-    dev_mode=True,
-)
+if __name__ == "__main__":
+    pipeline = dlt.pipeline(
+        pipeline_name="jaffle_shop_optimized_6",
+        destination="duckdb",
+        dataset_name="jaffle_shop_optimized_6",
+        # dev_mode=True,
+        progress="log",
+    )
 
-start_extract = time.time()
-pipeline.extract(jaffle_source())
-end_extract = time.time()
-
-start_normalize = time.time()
-pipeline.normalize()
-end_normalize = time.time()
-
-start_load = time.time()
-pipeline.load()
-end_load = time.time()
-
-print(pipeline.last_trace)
-print(f"Extract time: {end_extract - start_extract}")
-print(f"Normalize time: {end_normalize - start_normalize}")
-print(f"Load time: {end_load - start_load}")
+    pipeline.run(jaffle_source())
